@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Visor Incendios</title>
+
+    <!-- Load Calcite Design System -->
+    <script
+      type="module"
+      src="https://js.arcgis.com/calcite-components/3.3.3/calcite.esm.js"
+    ></script>
+
+    <!-- Load the JavaScript Maps SDK core API -->
+    <script src="https://js.arcgis.com/4.34/"></script>
+
+    <!-- Load the JavaScript Maps SDK Map components or other component packages -->
+    <script
+      type="module"
+      src="https://js.arcgis.com/4.34/map-components/"
+    ></script>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.34/esri/themes/light/main.css"
+    />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      #viewDiv {
+        height: 100%;
+      }
+    </style>
+
+    <script
+      type="module"
+      defer
+    >
+      // Cargamos las librerias
+
+      const Map = await $arcgis.import('@arcgis/core/Map.js')
+      const MapView = await $arcgis.import('@arcgis/core/views/MapView.js')
+      const FeatureLayer = await $arcgis.import(
+        '@arcgis/core/layers/FeatureLayer.js'
+      )
+      const Query = await $arcgis.import('@arcgis/core/rest/support/Query.js')
+      const SimpleMarkerSymbol = await $arcgis.import(
+        '@arcgis/core/symbols/SimpleMarkerSymbol.js'
+      )
+      const GraphicsLayer = await $arcgis.import(
+        '@arcgis/core/layers/GraphicsLayer.js'
+      )
+
+      // Cargo mi mapa
+
+      const miMapa = new Map({
+        basemap: 'topo-vector'
+      })
+
+      // Cargo la vista del Mapa
+
+      const vistaMapa = new MapView({
+        container: 'viewDiv',
+        map: miMapa
+      })
+
+      // Cargamos las capas
+
+      const paisesFl = new FeatureLayer({
+        url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries/FeatureServer'
+      })
+
+      const incendiosFl = new FeatureLayer({
+        portalItem: {
+          id: 'b8f4033069f141729ffb298b7418b653'
+        }
+      })
+
+      const capaGraficaResultadosGL = new GraphicsLayer()
+
+      miMapa.add(capaGraficaResultadosGL)
+
+      // miMapa.addMany([paisesFl, incendiosFl])
+
+      const parametrosQueryPaises = new Query({
+        where: "ISO_CC = 'ESP'",
+        returnGeometry: true,
+        outFields: ['*']
+      })
+
+      const resultadoQueryPaises = paisesFl.queryFeatures(parametrosQueryPaises)
+
+      resultadoQueryPaises.then((resultadoFeatureSet) => {
+        const entidades = resultadoFeatureSet.features
+
+        entidades.map((poligono) => {
+          // Consulta por Geometría
+
+          const parametrosQueryIncendios = new Query({
+            geometry: poligono.geometry,
+            returnGeometry: true,
+            outFields: ['*']
+          })
+
+          const resultadoQueryIncendios = incendiosFl.queryFeatures(
+            parametrosQueryIncendios
+          )
+
+          resultadoQueryIncendios.then((resultadoIncendiosFeatureSet) => {
+            const entidadesIncendios = resultadoIncendiosFeatureSet.features
+
+            const simbologiaIncendio = new SimpleMarkerSymbol({
+              angle: 164,
+              color: [254, 62, 62, 1],
+              outline: {
+                cap: 'round',
+                color: [81, 61, 61, 1],
+                join: 'round',
+                miterLimit: 1,
+                style: 'solid',
+                width: 1
+              },
+              path: 'undefined',
+              size: 12,
+              style: 'circle',
+              xoffset: 0,
+              yoffset: 0
+            })
+
+            const incendiosConSimbologia = entidadesIncendios.map(
+              (incendio) => {
+                incendio.symbol = simbologiaIncendio
+                return incendio
+              }
+            )
+
+            capaGraficaResultadosGL.addMany(incendiosConSimbologia)
+          })
+
+          resultadoQueryIncendios.catch((error) => {
+            console.log(error)
+          })
+        })
+      })
+
+      resultadoQueryPaises.catch((error) => {
+        console.log(error)
+      })
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>

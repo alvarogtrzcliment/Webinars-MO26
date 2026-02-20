@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Ejercicio 1-C</title>
+
+    <!-- Load Calcite Design System -->
+    <script
+      type="module"
+      src="https://js.arcgis.com/calcite-components/3.3.3/calcite.esm.js"
+    ></script>
+
+    <!-- Load the JavaScript Maps SDK core API -->
+    <script src="https://js.arcgis.com/4.34/"></script>
+
+    <!-- Load the JavaScript Maps SDK Map components or other component packages -->
+    <script
+      type="module"
+      src="https://js.arcgis.com/4.34/map-components/"
+    ></script>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.34/esri/themes/light/main.css"
+    />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      #viewDiv {
+        height: 100%;
+      }
+    </style>
+
+    <script
+      type="module"
+      defer
+    >
+      const Map = await $arcgis.import('@arcgis/core/Map.js')
+      const MapView = await $arcgis.import('@arcgis/core/views/MapView.js')
+      const FeatureLayer = await $arcgis.import(
+        '@arcgis/core/layers/FeatureLayer.js'
+      )
+
+      // Creo mi mapa
+
+      const miMapa = new Map({
+        basemap: 'topo-vector'
+      })
+
+      // Creo la vista de mi mapa
+
+      const vistaMapa = new MapView({
+        container: 'viewDiv',
+        map: miMapa,
+        center: [-4, 40],
+        zoom: 7
+      })
+
+      // Creo la capa
+
+      const hospitalesFL = new FeatureLayer({
+        url: 'https://services1.arcgis.com/nCKYwcSONQTkPA4K/ArcGIS/rest/services/Hospitales/FeatureServer/0'
+      })
+
+      miMapa.add(hospitalesFL)
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>

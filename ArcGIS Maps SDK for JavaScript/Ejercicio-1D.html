@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Cargar Escena</title>
+
+    <!-- Load Calcite Design System -->
+    <script
+      type="module"
+      src="https://js.arcgis.com/calcite-components/3.3.3/calcite.esm.js"
+    ></script>
+
+    <!-- Load the JavaScript Maps SDK core API -->
+    <script src="https://js.arcgis.com/4.34/"></script>
+
+    <!-- Load the JavaScript Maps SDK Map components or other component packages -->
+    <script
+      type="module"
+      src="https://js.arcgis.com/4.34/map-components/"
+    ></script>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.34/esri/themes/light/main.css"
+    />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      #viewDiv {
+        height: 100%;
+      }
+    </style>
+
+    <script
+      type="module"
+      defer
+    >
+      // Importamos los módulos necesarios
+
+      const Map = await $arcgis.import('@arcgis/core/Map.js')
+      const SceneView = await $arcgis.import('@arcgis/core/views/SceneView.js')
+
+      // Creo mi mapa
+
+      const miMapa = new Map({
+        basemap: 'gray-3d',
+        ground: 'world-elevation'
+      })
+
+      // Creo mi vista de Escena
+
+      const vistaEscena = new SceneView({
+        container: 'viewDiv',
+        map: miMapa
+      })
+    </script>
+  </head>
+  <body>
+    <div id="viewDiv"></div>
+  </body>
+</html>
